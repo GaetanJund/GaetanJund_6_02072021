@@ -2,13 +2,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const path = require('path');
 
 // Routes et models vers les sauces + utilisateurs
 const Thing = require('./models/sauces');
 const userRoutes = require('./routes/user');
-
-// Créer une application express
-const app = express();
+const saucesRoutes = require('./routes/sauces');
 
 // Connexion à la base MongoDB
 mongoose.connect('mongodb+srv://GaetanJund:12051997@sopekocko.xxtlc.mongodb.net/SoPekocko?retryWrites=true&w=majority', {
@@ -19,6 +18,9 @@ mongoose.connect('mongodb+srv://GaetanJund:12051997@sopekocko.xxtlc.mongodb.net/
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
+// Créer une application express
+const app = express();
+
 // Middleware Header pour contourner les erreurs en débloquant certains systèmes de sécurité CORS, afin que tout le monde puisse faire des requetes depuis son navigateur
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,26 +29,19 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post('/api/sauces', (req, res, next) => {
-  console.log(req.body);
-  res.status(201).json({
-    message: 'Objet créé !'
-  });
-});
-
 app.use(bodyParser.json());
 
-app.post('/api/sauces', (req, res, next) => {
-  delete req.body._id;
-  const thing = new Thing({
-    ...req.body
-  });
-  thing.save()
-    .then(() => res.status(201).json({ message: 'Objet enregistré' }))
-    .catch(error => res.status(401).json({ error }));
-});
+// Rendre requête exploitable
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+// Gestionnaire de routage
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Routes vers utilisateurs
 app.use('/api/auth', userRoutes);
+// Routes vers produits
+app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;
