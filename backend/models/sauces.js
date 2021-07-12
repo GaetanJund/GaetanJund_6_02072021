@@ -1,7 +1,5 @@
 // Importer mongoose
 const mongoose = require('mongoose');
-// Appel de validation_file pour sécurité des champs de texte d'ajout d'une sauce
-
 
 // Créer notre Schéma de données
 // Passage en non-required les infos non présentes dans l'ajout d'une sauce

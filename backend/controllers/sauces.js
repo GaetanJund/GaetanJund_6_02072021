@@ -72,4 +72,98 @@ exports.getAllThings = (req, res, next) => {
         .catch(error => res.status(400).json({ error }));
 };
 
-// Exports likes et dislikes
+// Ajout des like/dislike + modification like/dislike
+exports.likeAndDislike = (req, res, next) => {
+    const like = req.body.like
+    const userId = req.body.userId
+    const sauceId = req.params.id
+
+    if (like === 1) { // Pour ajouter un like
+        Thing.updateOne({
+            _id: sauceId
+        }, {
+            // On sauvegarde utilisateur qui a liké et ajout +1 compteur de like
+            $push: {
+                usersLiked: userId
+            },
+            $inc: {
+                likes: +1
+            },
+        })  // Envoi de l'info à la console
+            .then(() => res.status(200).json({
+                message: 'Sauce liké !'
+            }))
+            .catch((error) => res.status(400).json({
+                error
+            }))
+    }
+    if (like === -1) { // Pour dislike
+        Thing.updateOne(
+            {
+                _id: sauceId
+            }, {
+            // On sauvegarde utilisateur qui a disliké et ajout +1 compteur de dislike
+            $push: {
+                usersDisliked: userId
+            },
+            $inc: {
+                dislikes: +1
+            },
+        }
+        )   // Envoi de l'info à la console
+            .then(() => {
+                res.status(200).json({
+                    message: 'Sauce Dislike !'
+                })
+            })
+            .catch((error) => res.status(400).json({
+                error
+            }))
+    }
+    if (like === 0) { // Pour annuler un like/dislike
+        Thing.findOne({
+            _id: sauceId
+        })
+            .then((sauce) => {
+                if (sauce.usersLiked.includes(userId)) { // Annuler un like et enleve -1 au compteur de like
+                    Thing.updateOne({
+                        _id: sauceId
+                    }, {
+                        $pull: {
+                            usersLiked: userId
+                        },
+                        $inc: {
+                            likes: -1
+                        },
+                    })
+                        .then(() => res.status(200).json({
+                            message: 'Like retiré pour cette sauce !'
+                        }))
+                        .catch((error) => res.status(400).json({
+                            error
+                        }))
+                }
+                if (sauce.usersDisliked.includes(userId)) { // Annuler un dislike et enleve -1 au compteur de dislike
+                    Thing.updateOne({
+                        _id: sauceId
+                    }, {
+                        $pull: {
+                            usersDisliked: userId
+                        },
+                        $inc: {
+                            dislikes: -1
+                        },
+                    })
+                        .then(() => res.status(200).json({
+                            message: 'Dislike retiré pour cette sauce !'
+                        }))
+                        .catch((error) => res.status(400).json({
+                            error
+                        }))
+                }
+            })
+            .catch((error) => res.status(404).json({
+                error
+            }))
+    }
+}
