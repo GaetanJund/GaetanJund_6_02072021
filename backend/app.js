@@ -9,6 +9,10 @@ const Thing = require('./models/sauces');
 const userRoutes = require('./routes/user');
 const saucesRoutes = require('./routes/sauces');
 
+// Parametres de sécurité
+const helmet = require('helmet');
+const nocache = require('nocache');
+
 // Connexion à la base MongoDB
 mongoose.connect('mongodb+srv://GaetanJund:12051997@sopekocko.xxtlc.mongodb.net/SoPekocko?retryWrites=true&w=majority', {
   useCreateIndex: true,
@@ -35,6 +39,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+
+// Utilisation de helmet (filtre de script) et enlever la mise en cache
+app.use(helmet());
+app.use(nocache());
 
 // Gestionnaire de routage
 app.use('/images', express.static(path.join(__dirname, 'images')));
