@@ -12,6 +12,7 @@ const saucesRoutes = require('./routes/sauces');
 // Parametres de sécurité
 const helmet = require('helmet');
 const nocache = require('nocache');
+const session = require('cookie-session');
 
 // Connexion à la base MongoDB
 mongoose.connect('mongodb+srv://GaetanJund:12051997@sopekocko.xxtlc.mongodb.net/SoPekocko?retryWrites=true&w=majority', {
@@ -34,6 +35,18 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser.json());
+
+var expiryDate = new Date( Date.now() + 60 * 60 * 1000 ); // 1 hour
+app.use(session({
+  name: 'session',
+  keys: ['key1', 'key2'],
+  cookie: { secure: true,
+            httpOnly: true,
+            domain: 'http://localhost:4200',
+            expires: expiryDate
+          }
+  })
+);
 
 // Rendre requête exploitable
 app.use(bodyParser.urlencoded({
