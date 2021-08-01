@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
+require('dotenv').config()
+
 
 // Enregistrements de nouveau utilisateurs
 exports.signup = (req, res, next) => {
@@ -32,7 +34,7 @@ exports.login = (req, res, next) => {
             if (!user) {
                 return res.status(401).json({ error: 'Utilisateur non trouvé !' });
             }
-            // Compare le mot de passe entré avec elui présent dans la base de donnée
+            // Compare le mot de passe entré avec celui présent dans la base de donnée
             bcrypt.compare(req.body.password, user.password)
                 .then(valid => {
                     // Si mot de passe n'est pas bon, on renvoi un message
@@ -43,7 +45,7 @@ exports.login = (req, res, next) => {
                         userId: user._id,
                         token: jwt.sign(
                             { userId: user._id },
-                            'RANDOM_TOKEN_SECRET',
+                            process.env.TOKEN_KEY,
                             { expiresIn: '24h' }
                         )
                     });
