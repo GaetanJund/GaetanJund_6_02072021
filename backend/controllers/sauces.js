@@ -1,46 +1,46 @@
-// Importer le Thing
-const Thing = require('../models/sauces');
+// Importer le Sauce
+const Sauce = require('../models/sauces');
 const fs = require('fs');
 
-// Thing = Sauce
+// Sauce = Sauce
 
 // Crée une sauce dasn la base de donnée MongoDB
-exports.createThing = (req, res, next) => {
-    const thingObject = JSON.parse(req.body.sauce);
-    delete thingObject._id;
-    const thing = new Thing({
-        ...thingObject,
+exports.createSauce = (req, res, next) => {
+    const SauceObject = JSON.parse(req.body.sauce);
+    delete SauceObject._id;
+    const sauce = new Sauce({
+        ...SauceObject,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
         likes: 0,
         dislikes: 0,
         usersLiked: [],
         usersDislikded: []
     });
-    console.log(thing);
-    thing.save()
-        .then(() => res.status(201).json({ message: 'Objet enregistré !' }))
+    console.log(Sauce);
+    sauce.save()
+        .then(() => res.status(201).json({ message: 'Sauce enregistré !' }))
         .catch(error => res.status(400).json({ error }));
 };
 
 // Modifie une sauce de la base de donnée MongoDB
-exports.modifyThing = (req, res, next) => {
-    const thingObject = req.file ?
+exports.modifySauce = (req, res, next) => {
+    const SauceObject = req.file ?
         {
-            ...JSON.parse(req.body.thing),
+            ...JSON.parse(req.body.Sauce),
             imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
         } : { ...req.body };
-    Thing.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
+    Sauce.updateOne({ _id: req.params.id }, { ...SauceObject, _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Objet modifié !' }))
         .catch(error => res.status(400).json({ error }));
 };
 
 // Supprime une sauce de la base de donnée MongoDB
-exports.deleteThing = (req, res, next) => {
-    Thing.findOne({ _id: req.params.id })
-        .then(thing => {
-            const filename = thing.imageUrl.split('/images/')[1];
+exports.deleteSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id })
+        .then(Sauce => {
+            const filename = Sauce.imageUrl.split('/images/')[1];
             fs.unlink(`images/${filename}`, () => {
-                Thing.deleteOne({ _id: req.params.id })
+                Sauce.deleteOne({ _id: req.params.id })
                     .then(() => res.status(200).json({ message: 'Objet supprimé !' }))
                     .catch(error => res.status(400).json({ error }));
             });
@@ -49,12 +49,12 @@ exports.deleteThing = (req, res, next) => {
 };
 
 // Récupère une sauce de la base de donnée MongoDB
-exports.getOneThing = (req, res, next) => {
-    Thing.findOne({
+exports.getOneSauce = (req, res, next) => {
+    Sauce.findOne({
         _id: req.params.id
     }).then(
-        (thing) => {
-            res.status(200).json(thing);
+        (Sauce) => {
+            res.status(200).json(Sauce);
         }
     ).catch(
         (error) => {
@@ -66,9 +66,9 @@ exports.getOneThing = (req, res, next) => {
 };
 
 // Récupère toutes les sauces de la base de donnéeMongoDB
-exports.getAllThings = (req, res, next) => {
-    Thing.find()
-        .then(things => res.status(200).json(things))
+exports.getAllSauces = (req, res, next) => {
+    Sauce.find()
+        .then(Sauces => res.status(200).json(Sauces))
         .catch(error => res.status(400).json({ error }));
 };
 
@@ -79,7 +79,7 @@ exports.likeAndDislike = (req, res, next) => {
     const sauceId = req.params.id
 
     if (like === 1) { // Pour ajouter un like
-        Thing.updateOne({
+        Sauce.updateOne({
             _id: sauceId
         }, {
             // On sauvegarde utilisateur qui a liké et ajout +1 compteur de like
@@ -98,7 +98,7 @@ exports.likeAndDislike = (req, res, next) => {
             }))
     }
     if (like === -1) { // Pour dislike
-        Thing.updateOne(
+        Sauce.updateOne(
             {
                 _id: sauceId
             }, {
@@ -121,12 +121,12 @@ exports.likeAndDislike = (req, res, next) => {
             }))
     }
     if (like === 0) { // Pour annuler un like/dislike
-        Thing.findOne({
+        Sauce.findOne({
             _id: sauceId
         })
             .then((sauce) => {
                 if (sauce.usersLiked.includes(userId)) { // Annuler un like et enleve -1 au compteur de like
-                    Thing.updateOne({
+                    Sauce.updateOne({
                         _id: sauceId
                     }, {
                         $pull: {
@@ -144,7 +144,7 @@ exports.likeAndDislike = (req, res, next) => {
                         }))
                 }
                 if (sauce.usersDisliked.includes(userId)) { // Annuler un dislike et enleve -1 au compteur de dislike
-                    Thing.updateOne({
+                    Sauce.updateOne({
                         _id: sauceId
                     }, {
                         $pull: {

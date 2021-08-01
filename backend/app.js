@@ -1,4 +1,4 @@
-// Importe le paquet express + body-parder + mongoose
+// Importe package express + body-parder + mongoose
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -24,7 +24,7 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 
-// Créer une application express
+// Application va tourner avec express
 const app = express();
 
 // Middleware Header pour contourner les erreurs en débloquant certains systèmes de sécurité CORS, afin que tout le monde puisse faire des requetes depuis son navigateur
@@ -35,22 +35,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(bodyParser.json());
-
-var expiryDate = new Date( Date.now() + 60 * 60 * 1000 ); // 1 hour
-app.use(session({
-  name: 'session',
-  keys: ['key1', 'key2'],
-  cookie: { secure: true,
-            httpOnly: true,
-            domain: 'http://localhost:4200',
-            expires: expiryDate
-          }
-  })
-);
+app.use(express.json());
 
 // Rendre requête exploitable
-app.use(bodyParser.urlencoded({
+app.use(express.urlencoded({
   extended: true
 }));
 
